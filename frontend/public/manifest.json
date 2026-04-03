@@ -1,0 +1,9 @@
+{
+  "short_name": "CareFlow",
+  "name": "CareFlow Twin",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#020617",
+  "background_color": "#020617"
+}

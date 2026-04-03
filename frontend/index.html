@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CareFlow Twin</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 20px; }
+      textarea { width: 100%; height: 120px; }
+      input, select, button { padding: 8px; margin: 4px 0; }
+      .card { border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; }
+      .row { display: flex; gap: 12px; }
+      .row > div { flex: 1; }
+      pre { background: #f8f8f8; padding: 12px; overflow: auto; }
+    </style>
+  </head>
+  <body>
+    <h1>CareFlow Twin (legacy API utility)</h1>
+    <div class="card">
+      <h3>Config</h3>
+      <div class="row">
+        <div>
+          <label>API Base URL</label>
+          <input id="baseUrl" placeholder="http://localhost:8000" value="http://localhost:8000" />
+        </div>
+        <div>
+          <label>API Key (optional)</label>
+          <input id="apiKey" placeholder="set if backend requires API_KEY" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Admit Patient</h3>
+      <input id="admitName" placeholder="Name" />
+      <input id="admitAge" type="number" placeholder="Age" />
+      <input id="admitCond" placeholder="Condition" />
+      <select id="admitSev">
+        <option value="moderate" selected>moderate</option>
+        <option value="critical">critical</option>
+        <option value="low">low</option>
+      </select>
+      <button onclick="admit()">Admit</button>
+      <pre id="admitOut"></pre>
+    </div>
+
+    <div class="card">
+      <h3>AI Proposal</h3>
+      <textarea id="agentMsg" placeholder="e.g., Admit John Doe, 45, chest pain, moderate"></textarea>
+      <button onclick="agentChat()">Send</button>
+      <pre id="agentOut"></pre>
+    </div>
+
+    <script>
+      function headers() {
+        const h = { 'Content-Type': 'application/json' };
+        const key = document.getElementById('apiKey').value.trim();
+        if (key) h['x-api-key'] = key;
+        return h;
+      }
+
+      async function admit() {
+        const url = document.getElementById('baseUrl').value + '/admit_patient';
+        const body = {
+          patient_name: document.getElementById('admitName').value,
+          age: Number(document.getElementById('admitAge').value || 0),
+          condition: document.getElementById('admitCond').value,
+          severity: document.getElementById('admitSev').value
+        };
+        const res = await fetch(url, { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+        const data = await res.json();
+        document.getElementById('admitOut').textContent = JSON.stringify(data, null, 2);
+      }
+
+      async function agentChat() {
+        const url = document.getElementById('baseUrl').value + '/agent/propose';
+        const body = { message: document.getElementById('agentMsg').value };
+        const res = await fetch(url, { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+        const data = await res.json();
+        document.getElementById('agentOut').textContent = JSON.stringify(data, null, 2);
+      }
+    </script>
+  </body>
+  </html>
